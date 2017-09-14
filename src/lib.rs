@@ -1,6 +1,11 @@
 extern crate smallvec;
+extern crate unicode_width;
+
+mod unicode;
 
 use smallvec::*;
+use unicode_width::UnicodeWidthStr;
+use unicode::UnicodeStrExt;
 use std::io::{ Write, Result };
 use std::iter::repeat;
 
@@ -48,7 +53,7 @@ const OFFSET:  usize = 4;
 /// use std::io::{ stdout, BufWriter };
 ///
 /// let stdout = stdout();
-/// let out = b"Hello fellow Rustaceans!";
+/// let out = "Hello fellow Rustaceans!";
 /// let width = 24;
 ///
 /// let mut writer = BufWriter::new(stdout.lock());
@@ -69,7 +74,7 @@ const OFFSET:  usize = 4;
 ///                 / '-----' \
 /// ```
 
-pub fn say<W>(input: &[u8], width: usize, writer: &mut W) -> Result<()>
+pub fn say<W>(input: &str, width: usize, writer: &mut W) -> Result<()>
     where W: Write
 {
     // Final output is stored here
@@ -80,12 +85,12 @@ pub fn say<W>(input: &[u8], width: usize, writer: &mut W) -> Result<()>
 
     write_buffer.extend_from_slice(&bar_buffer);
     write_buffer.push(NEWLINE);
-    for i in input.split(|x| *x == '\n' as u8) {
+    for i in input.split('\n') {
         for j in i.chunks(width) {
             write_buffer.extend_from_slice(ENDSL);
-            write_buffer.extend_from_slice(j);
+            write_buffer.extend_from_slice(j.as_bytes());
 
-            for _ in 0 .. width - j.len() {
+            for _ in 0 .. width - j.width() {
                 write_buffer.push(SPACE);
             }
 

@@ -87,7 +87,8 @@ fn run() -> Result<()> {
 
         let mut writer = BufWriter::new(stdout.lock());
         for i in reader {
-            say(&i?, width, &mut writer)
+            let i = String::from_utf8(i?).chain_err(|| INPUT)?;
+            say(&i, width, &mut writer)
                 .chain_err(|| STDOUT)?;
         }
 
@@ -105,6 +106,7 @@ fn run() -> Result<()> {
                     a
                 }
             })?;
+        let reader = String::from_utf8(reader).chain_err(|| INPUT)?;
         let mut writer = BufWriter::new(stdout.lock());
         say(&reader, width, &mut writer)
             .chain_err(|| STDOUT)
